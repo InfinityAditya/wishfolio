@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Bhau</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+    }
+    .heading {
+      font-size: 3.5rem;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+      margin-bottom: 2rem;
+      background: linear-gradient(45deg, #FFD700, #FFA500, #FF69B4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 2s infinite linear;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      max-width: 300px;
+      text-align: center;
+      transform: translateY(10px);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .button-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 3;
+    }
+
+    .sound-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #FF69B4;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .sound-button:hover {
+      background-color: #FF1493;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starCanvas"></canvas>
+
+  <!-- Activate Sound Button -->
+  <div class="button-container">
+    <button class="sound-button" onclick="toggleSound()">Activate Sound</button>
+  </div>
+
+  <div class="content">
+    <h1 class="heading">Happy Birthday Bhau</h1>
+    <div class="card">
+      <p style="font-size: 1.2rem; margin-bottom: 1rem;">Dear Bhau,</p>
+      <p style="line-height: 1.6;">Wishing you a day filled with joy, laughter, and beautiful moments. May this year bring you endless happiness and success!</p>
+      <p style="margin-top: 1rem; font-style: italic;">With love and best wishes ❤️</p>
+    </div>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="birthdaySong" src="happy-birthday-155461.mp3" preload="auto"></audio>
+
+  <script>
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size to window size
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Mouse position
+    let mouseX = 0;
+    let mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    // Audio element and play logic
+    const audio = document.getElementById('birthdaySong');
+    let isPlaying = false;
+
+    function toggleSound() {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      isPlaying = !isPlaying;
+    }
+
+    // Colors for confetti
+    const colors = ['#FF69B4', '#4169E1', '#FF4500', '#9400D3', '#32CD32', '#FFD700'];
+
+    // Confetti class
+    class Confetti {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = 0;
+        this.size = Math.random() * 6 + 4;
+        this.speedY = Math.random() * 3 + 2;
+        this.speedX = Math.random() * 4 - 2;
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = Math.random() * 10 - 5;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.shape = Math.floor(Math.random() * 3);
+        this.opacity = 1;
+      }
+
+      update() {
+        const dx = this.x - mouseX;
+        const dy = this.y - mouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 100) {
+          const angle = Math.atan2(dy, dx);
+          const force = (100 - distance) / 10;
+          this.speedX += Math.cos(angle) * force * 0.1;
+        }
+
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rotation += this.rotationSpeed;
+        this.speedX *= 0.99;
+        this.speedY *= 0.99;
+
+        if (this.y > canvas.height || this.x < 0 || this.x > canvas.width) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        ctx.fillStyle = this.color;
+
+        if (this.shape === 0) {
+          ctx.fillRect(-this.size/2, -this.size/6, this.size, this.size/3);
+        } else if (this.shape === 1) {
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size/3, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          for (let i = 0; i < Math.PI * 2; i += 0.3) {
+            const x = (i * this.size/10) * Math.cos(i);
+            const y = (i * this.size/10) * Math.sin(i);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    class Star {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = 0;
+        this.size = Math.random() * 3 + 1;
+        this.speedY = Math.random() * 2 + 1;
+        this.speedX = 0;
+        this.gold = Math.random() > 0.5;
+      }
+
+      update() {
+        const dx = this.x - mouseX;
+        const dy = this.y - mouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 100) {
+          const angle = Math.atan2(dy, dx);
+          const force = (100 - distance) / 10;
+          this.speedX += Math.cos(angle) * force * 0.1;
+        }
+
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.speedX *= 0.98;
+
+        if (this.y > canvas.height || this.x < 0 || this.x > canvas.width) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = this.gold ? '#FFD700' : '#FFFFFF';
+
+        const spikes = 5;
+        const rot = Math.PI/2 * 3;
+        const step = Math.PI / spikes;
+
+        for (let i = 0; i < spikes; i++) {
+          const x1 = this.x + Math.cos(rot + i * step * 2) * this.size;
+          const y1 = this.y + Math.sin(rot + i * step * 2) * this.size;
+          if (i === 0) {
+            ctx.moveTo(x1, y1);
+          } else {
+            ctx.lineTo(x1, y1);
+          }
+
+          const x2 = this.x + Math.cos(rot + i * step * 2 + step) * (this.size/2);
+          const y2 = this.y + Math.sin(rot + i * step * 2 + step) * (this.size/2);
+          ctx.lineTo(x2, y2);
+        }
+
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // Create particles
+    const stars = Array(100).fill().map(() => new Star());
+    const confetti = Array(100).fill().map(() => new Confetti());
+
+    // Animation loop
+    function animate() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      stars.forEach(star => {
+        star.update();
+        star.draw();
+      });
+
+      confetti.forEach(piece => {
+        piece.update();
+        piece.draw();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
